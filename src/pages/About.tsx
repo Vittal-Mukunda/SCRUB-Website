@@ -2,18 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo";
 import Reveal from "../components/Reveal";
-import CountUp from "../components/CountUp";
+import Roadmap from "../components/Roadmap";
 import WaterBackdrop from "../components/WaterBackdrop";
 import { useInView } from "../components/useInView";
 import { ArrowRight } from "../components/Icons";
-import { bots, brand, founders, funding } from "../data/content";
+import { bots, brand, nextUp, timeline } from "../data/content";
 import { photo } from "../data/photo";
 import { prefetch } from "../routes";
-
-function initials(name: string) {
-  const parts = name.split(" ").filter(Boolean);
-  return (parts[0]?.[0] ?? "S") + (parts[1]?.[0] ?? "");
-}
 
 export default function About() {
   const [videoOk, setVideoOk] = useState(true);
@@ -37,12 +32,6 @@ export default function About() {
     if (missionOnScreen) v.play().catch(() => {});
     else v.pause();
   }, [missionOnScreen, nearMission]);
-
-  /** Story slides: scroll stops on each slide instead of gliding through. */
-  useEffect(() => {
-    document.documentElement.classList.add("snap");
-    return () => document.documentElement.classList.remove("snap");
-  }, []);
 
   return (
     <>
@@ -110,43 +99,37 @@ export default function About() {
         </div>
       </section>
 
-      {/* 3. FUNDING: full-bleed split, the amount on deep green, backers beside it */}
-      <section className="slide funding" aria-labelledby="funding-title">
-        <div className="funding__panel">
-          <Reveal className="funding__figure">
-            <p className="eyebrow">Backed to build</p>
-            <h2 id="funding-title" className="sr-only">Funding raised</h2>
-            <div className="funding__amount" aria-label={`${funding.amount} ${funding.unit} raised`}>
-              <span className="funding__cur">₹</span>
-              <CountUp to={funding.amount} />
-              <span className="funding__unit">{funding.unit}</span>
-            </div>
-            <p className="funding__caption">
-              raised across <strong>{funding.sponsorCount} sponsors &amp; stakeholders</strong>, funding our field trials, our
-              fleet and the next generation of SCRUB.
-            </p>
-            <ul className="funding__uses" aria-label="What the funding goes into">
-              <li>Field trials</li>
-              <li>Our fleet</li>
-              <li>The next SCRUB</li>
-            </ul>
-          </Reveal>
-        </div>
+      {/* 3 to 7. THE JOURNEY: the intro slide breaks into leaves, V1 clears them, then one step per robot */}
+      <Roadmap />
 
-        <div className="funding__side">
-          <div className="funding__backers">
+      {/* 8. WHERE WE ARE NOW, AND WHAT IS NEXT */}
+      <section className="slide today" aria-labelledby="today-title">
+        <div className="wrap today__grid">
+          <div>
             <Reveal>
-              <h3 className="funding__h">Our backers</h3>
+              <p className="eyebrow">So far</p>
+              <h2 id="today-title" className="display">From the first splash to the national press.</h2>
             </Reveal>
-            <ul className="sponsors">
-              {funding.sponsors.map((s, i) => (
-                <Reveal as="li" key={i} delay={0.1 * i} className="sponsor">
-                  <span className="sponsor__logo" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                  <div>
-                    <strong>{s.name}</strong>
-                    <span>{s.kind}</span>
-                  </div>
-                  {import.meta.env.DEV && s.draft && <em className="draft-tag">placeholder</em>}
+            <ol className="path">
+              {timeline.map((t, i) => (
+                <Reveal as="li" key={t.title} delay={0.08 * i}>
+                  <time>{t.when}</time>
+                  <strong>{t.title}</strong>
+                  <span>{t.text}</span>
+                </Reveal>
+              ))}
+            </ol>
+          </div>
+          <div className="today__next">
+            <Reveal>
+              <p className="eyebrow">What is next</p>
+            </Reveal>
+            <ul>
+              {nextUp.map((n, i) => (
+                <Reveal as="li" key={n.title} delay={0.1 * i} className="next-card">
+                  <strong>{n.title}</strong>
+                  <span>{n.text}</span>
+                  {import.meta.env.DEV && n.draft && <em className="draft-tag">draft</em>}
                 </Reveal>
               ))}
             </ul>
@@ -154,34 +137,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* 4. FOUNDERS */}
-      <section className="slide founders" aria-labelledby="founders-title">
-        <div className="wrap">
-          <Reveal>
-            <p className="eyebrow">The team behind SCRUB</p>
-            <h2 id="founders-title" className="display">Meet the founders.</h2>
-          </Reveal>
-          <ul className="founders__grid">
-            {founders.map((f, i) => (
-              <Reveal as="li" key={i} delay={0.12 * i} className="founder">
-                <div className="founder__photo">
-                  {f.photo ? (
-                    <img src={f.photo} alt={f.name} loading="lazy" />
-                  ) : (
-                    <span aria-hidden="true">{initials(f.name)}</span>
-                  )}
-                </div>
-                <h3>{f.name}</h3>
-                <p className="founder__role">{f.role}</p>
-                <p className="founder__bio">{f.bio}</p>
-                {import.meta.env.DEV && <em className="draft-tag draft-tag--dark">placeholder</em>}
-              </Reveal>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* 5. CTA: the four robots, each a way into the showroom */}
+      {/* 9. CTA: the four robots, each a way into the showroom */}
       <section className="slide cta" aria-labelledby="cta-title">
         <WaterBackdrop intensity="soft" />
         <div className="wrap cta__inner">

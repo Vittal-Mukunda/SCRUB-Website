@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Reveal from "../components/Reveal";
 import Callouts from "../components/Callouts";
 import BotDetails from "../components/BotDetails";
@@ -66,7 +66,12 @@ export default function Products() {
   const [params, setParams] = useSearchParams();
   const selected = useMemo(() => bots.find((b) => b.id === params.get("bot"))?.id ?? null, [params]);
   const bot = bots.find((b) => b.id === selected) ?? null;
-  const [viewer, setViewer] = useState(false);
+  // The 360° viewer lives in the URL (?bot=v1&view=3d) as its own history step, so the browser's Back
+  // button closes it. Kept in component state it outlived Back: the viewer vanished with the robot, but
+  // the showroom stayed paused behind it and the four robots never came back.
+  const viewer = !!selected && params.get("view") === "3d";
+  const navigate = useNavigate();
+  const location = useLocation();
   const [settled, setSettled] = useState(false);
   const [canGL] = useState(webglAvailable);
   const [loaded, setLoaded] = useState(0);
@@ -111,8 +116,14 @@ export default function Products() {
 
   const select = useCallback((id: BotId) => setParams({ bot: id }), [setParams]);
   const back = useCallback(() => setParams({}), [setParams]);
-  const open = useCallback(() => setViewer(true), []);
-  const closeViewer = useCallback(() => setViewer(false), []);
+  const open = useCallback(() => {
+    if (selected) setParams({ bot: selected, view: "3d" }, { state: { viewerPushed: true } });
+  }, [selected, setParams]);
+  const closeViewer = useCallback(() => {
+    // opened from this page: step back, so a later Back does not reopen it; opened from a shared link: just drop it
+    if ((location.state as { viewerPushed?: boolean } | null)?.viewerPushed) navigate(-1);
+    else if (selected) setParams({ bot: selected }, { replace: true });
+  }, [location.state, navigate, selected, setParams]);
   const hoverCard = useCallback((i: number) => {
     hoverRef.current = i;
     setHover(i);

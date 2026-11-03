@@ -12,23 +12,20 @@ export interface OrbitViewerProps {
   botId: string;
   autoRotate: boolean;
   running: boolean;
-  /** 0..1 exploded-view amount */
-  explode: number;
 }
 
-function Scene({ botId, autoRotate, running, explode }: OrbitViewerProps) {
+function Scene({ botId, autoRotate, running }: OrbitViewerProps) {
   const [fit, setFit] = useState<Fit | null>(null);
-  const ex = useRef(0);
+  const ex = useRef(0); // the models support an exploded view; the viewer always shows them assembled
   const run = useRef(false);
   const blob = useMemo(() => blobTexture(), []);
   const aspect = useThree((s) => s.size.width / Math.max(1, s.size.height));
 
-  useFrame((_, dt) => {
-    ex.current += (explode - ex.current) * Math.min(1, dt * 4);
+  useFrame(() => {
     run.current = running;
   });
 
-  const radius = fit ? Math.max(fit.d / 2, fit.sy * 0.7) * (1 + explode * 0.3) : 1.5;
+  const radius = fit ? Math.max(fit.d / 2, fit.sy * 0.7) : 1.5;
   const dist = fitDistance(radius, 40, Math.max(0.3, aspect));
   const dir = useMemo(() => new THREE.Vector3(1, 0.55, 1.15).normalize(), []);
   const target: [number, number, number] = [0, fit ? fit.sy * 0.4 : 0.3, 0];

@@ -10,7 +10,6 @@ const OrbitViewer = lazy(() => import("../three/OrbitViewer"));
 export default function ModelViewer({ bot, onClose }: { bot: Bot; onClose: () => void }) {
   const [autoRotate, setAutoRotate] = useState(false);
   const [running, setRunning] = useState(false);
-  const [explode, setExplode] = useState(0);
   const [resetKey, setResetKey] = useState(0);
   const closeBtn = useRef<HTMLButtonElement>(null);
 
@@ -33,7 +32,7 @@ export default function ModelViewer({ bot, onClose }: { bot: Bot; onClose: () =>
       <div className="mv__canvas">
         <ViewerBoundary fallback={<img className="mv__photo" src={bot.cover} alt={bot.name} />}>
           <Suspense fallback={<Loader label="Preparing the 3D view" className="loader--cover" />}>
-            <OrbitViewer key={resetKey} botId={bot.id} autoRotate={autoRotate} running={running} explode={explode} />
+            <OrbitViewer key={resetKey} botId={bot.id} autoRotate={autoRotate} running={running} />
           </Suspense>
         </ViewerBoundary>
       </div>
@@ -58,11 +57,7 @@ export default function ModelViewer({ bot, onClose }: { bot: Bot; onClose: () =>
           <button className={`vbtn ${running ? "is-on" : ""}`} aria-pressed={running} onClick={() => setRunning((v) => !v)}>
             <Play width={14} height={14} /> {running ? "Running" : "Run"}
           </button>
-          <label className="vslider">
-            <span>Explode</span>
-            <input type="range" min={0} max={100} value={Math.round(explode * 100)} onChange={(e) => setExplode(Number(e.target.value) / 100)} aria-label="Exploded view amount" />
-          </label>
-          <button className="vbtn" onClick={() => { setExplode(0); setResetKey((k) => k + 1); }}>Reset view</button>
+          <button className="vbtn" onClick={() => setResetKey((k) => k + 1)}>Reset view</button>
         </div>
       </div>
     </div>

@@ -290,8 +290,6 @@ html.snap { scroll-snap-type: y mandatory; }
 .vbtn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--tx-dim); font-size: 0.9rem; font-weight: 500; transition: color 0.2s, border-color 0.2s, background 0.2s; }
 .vbtn:hover { color: var(--green-deep); border-color: var(--green); }
 .vbtn.is-on { color: #fff; background: var(--green); border-color: var(--green); }
-.vslider { display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--tx-dim); font-size: 0.9rem; font-weight: 500; }
-.vslider input { width: 110px; accent-color: var(--green); }
 
 /* fallback photo cards (no WebGL) and product detail */
 .bot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }

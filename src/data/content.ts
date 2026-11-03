@@ -22,10 +22,22 @@ export interface Spec {
   reported?: boolean;
 }
 
+/** Where a robot sits on the home page's journey scroll. */
+export interface Roadmap {
+  /** approximate introduction date shown on the timeline */
+  when: string;
+  headline: string;
+  /** one or two sentences: what this robot is for and why it came next */
+  story: string;
+  /** true = timing is an estimate the team still has to confirm */
+  draft?: boolean;
+}
+
 export interface Bot {
   id: BotId;
   name: string;
   purpose: string;
+  roadmap: Roadmap;
   environment: string;
   status: "Field-tested" | "In development";
   summary: string;
@@ -44,6 +56,13 @@ export const bots: Bot[] = [
     id: "v1",
     name: "SCRUB V1",
     purpose: "Large lakes & rivers",
+    roadmap: {
+      when: "Early 2026",
+      headline: "Where it all began.",
+      story:
+        "The first SCRUB proved that a robot could lift floating waste and weeds off a big lake. Built for municipal-scale water, it was tested at Kengeri Lake with BBMP and later put to work on Madiwala.",
+      draft: true,
+    },
     environment: "Municipal-scale water bodies",
     status: "Field-tested",
     summary:
@@ -78,6 +97,13 @@ export const bots: Bot[] = [
     id: "v2",
     name: "SCRUB V2",
     purpose: "Ponds, estates & mid-size lakes",
+    roadmap: {
+      when: "Mid 2026",
+      headline: "Smaller, simpler, autonomous.",
+      story:
+        "Not every water body needs a heavy machine. V2 drops the conveyor for a passive intake, so a compact robot can clear the ponds and mid-size lakes inside estates and campuses. Reported at 25 kg per run, 500 m range and up to 5 hours.",
+      draft: true,
+    },
     environment: "Gated communities, campuses, managed ponds",
     status: "Field-tested",
     summary:
@@ -112,6 +138,13 @@ export const bots: Bot[] = [
     id: "v3",
     name: "SCRUB V3",
     purpose: "Rivers & canals",
+    roadmap: {
+      when: "Aug 2026",
+      headline: "Let the river do the work.",
+      story:
+        "On flowing water, chasing debris is the wrong game. V3 is a floating boom that steers drifting waste to a shore-side collection point, built for rivers, canals and storm-water channels. Still in development.",
+      draft: true,
+    },
     environment: "Flowing water, storm-water channels",
     status: "In development",
     summary:
@@ -141,6 +174,13 @@ export const bots: Bot[] = [
     id: "v4",
     name: "SCRUB V4",
     purpose: "Water intelligence",
+    roadmap: {
+      when: "Sep 2026",
+      headline: "Know the water, not just clean it.",
+      story:
+        "Cleaning only works if you know what is in the water. V4 is a compact, modular survey robot that takes GPS-tagged pH, TDS and turbidity readings and feeds the SCRUB Observatory. Its first lake map was Madiwala, on 8 Sep 2026.",
+      draft: true,
+    },
     environment: "Any lake that needs monitoring",
     status: "Field-tested",
     summary:
@@ -185,23 +225,10 @@ export const brand = {
   videoSrc: "/media/videos/mission.mp4",
 };
 
-export const funding = {
-  amount: 50,
-  unit: "Lakhs",
-  sponsorCount: 3,
-  /** TODO: replace with real sponsor / stakeholder names (and logos in /public/media/sponsors) */
-  sponsors: [
-    { name: "Sponsor name 1", kind: "Stakeholder type", draft: true },
-    { name: "Sponsor name 2", kind: "Stakeholder type", draft: true },
-    { name: "Sponsor name 3", kind: "Stakeholder type", draft: true },
-  ],
-};
-
-/** TODO: no founder names were found online. Fill these in, add photos to /public/media/team. */
-export const founders = [
-  { name: "Founder name", role: "Co-founder · Role", bio: "One line on what they lead and why they started SCRUB.", photo: null as string | null, linkedin: null as string | null },
-  { name: "Founder name", role: "Co-founder · Role", bio: "One line on what they lead and why they started SCRUB.", photo: null as string | null, linkedin: null as string | null },
-  { name: "Founder name", role: "Co-founder · Role", bio: "One line on what they lead and why they started SCRUB.", photo: null as string | null, linkedin: null as string | null },
+/** What comes after the four robots, shown at the end of the journey scroll. Both are team-confirmable drafts. */
+export const nextUp = [
+  { title: "Doddathoguru Lake", text: "The Electronic City survey on 29 Oct 2026 scoped our next lake deployment." },
+  { title: "V3 into the water", text: "Moving the river and canal interceptor from design towards field trials.", draft: true },
 ];
 
 /* ------------------------------ IMPACT ------------------------------ */

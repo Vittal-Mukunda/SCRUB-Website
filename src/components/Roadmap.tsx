@@ -8,9 +8,12 @@ import { useInView } from "./useInView";
 import { bots } from "../data/content";
 import { photo } from "../data/photo";
 import { webglAvailable } from "../three/webgl";
-import { clamp, smooth } from "../three/timeline";
+import { smooth } from "../three/timeline";
 import type { LeafSources } from "../three/timeline";
 import { prefetch } from "../routes";
+import { useJourneyGate } from "./useJourneyGate";
+
+const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const RoadmapScene = lazy(() => import("../three/Roadmap"));
 
@@ -109,7 +112,6 @@ export default function Roadmap() {
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
-  const scrubRef = useRef<HTMLElement>(null);
   /** -2 before the journey, -1 on the journey slide, 0..3 the robot on stage, 4 after the last */
   const activeRef = useRef(-2);
   const reserveRef = useRef(0);
@@ -193,25 +195,19 @@ export default function Roadmap() {
     };
   }, []);
 
-  // the transition follows the scroll: how far through the journey slide's stretch of scroll the visitor is
+  // the transition is stepped by scrolling (see useJourneyGate), which writes the clock `u`
+  useJourneyGate(rootRef, uRef, !canGL || prefersReducedMotion());
+
+  // what the slide and the V1 chapter show for the current `u`
   useEffect(() => {
     const introEl = introRef.current;
-    const scrub = scrubRef.current;
-    if (!introEl || !scrub || !onScreen) return;
+    if (!introEl || !onScreen) return;
     let raf = 0;
-    let last = performance.now();
     let shown = -1;
     let clear = false;
-    const tick = (now: number) => {
+    const tick = () => {
       raf = requestAnimationFrame(tick);
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      const r = scrub.getBoundingClientRect();
-      const target = clamp(-r.top / Math.max(1, r.height));
-      // a touch of smoothing on top of the scroll itself, so touch flicks and scrollbar drags stay fluid
-      let u = uRef.current;
-      u = Math.abs(target - u) < 0.0005 ? target : u + (target - u) * (1 - Math.exp(-dt * 14));
-      uRef.current = u;
+      const u = uRef.current;
 
       // the slide's own text gives way to the leaves redrawing it (or just fades, with no 3D to draw them)
       const leafMode = show3d && leavesReady.current;
@@ -233,7 +229,9 @@ export default function Roadmap() {
   }, [onScreen, show3d]);
 
   const rail = Math.min(Math.max(active, 0), bots.length - 1);
-  const onBots = active >= 0 && active < bots.length;
+  // the robots' chapters start once V1 has cleared the lake, not while the journey slide is still being played
+  const onBots = active >= 0 && active < bots.length && lakeClear;
+  const photoActive = lakeClear ? active : -2;
 
   return (
     <div ref={rootRef} id="roadmap" className={`roadmap ${ready ? "is-ready" : ""}`}>
@@ -271,7 +269,7 @@ export default function Roadmap() {
 
         <div className="roadmap__scene" aria-hidden="true">
           {show3d && near ? (
-            <ViewerBoundary fallback={<PhotoLayer active={active} />}>
+            <ViewerBoundary fallback={<PhotoLayer active={photoActive} />}>
               <Suspense fallback={null}>
                 <div className="roadmap__canvas">
                   <RoadmapScene
@@ -287,7 +285,7 @@ export default function Roadmap() {
               </Suspense>
             </ViewerBoundary>
           ) : (
-            !show3d && <PhotoLayer active={active} />
+            !show3d && <PhotoLayer active={photoActive} />
           )}
 
           <ol className={`rail ${onBots ? "is-shown" : ""}`} style={{ "--p": rail / (bots.length - 1) } as CSSProperties}>
@@ -302,8 +300,8 @@ export default function Roadmap() {
         </div>
       </div>
 
-      {/* a stretch of scroll that plays the journey slide's transition, then one step per robot */}
-      <section ref={scrubRef} data-step id="step-intro" className="step step--spacer" aria-hidden="true" />
+      {/* the journey slide's transition is stepped by two scrolls (useJourneyGate), then one step per robot */}
+      <section data-step id="step-intro" className="step step--spacer" aria-hidden="true" />
       {bots.map((b, i) => {
         const feats = b.features.filter((f) => !f.draft).slice(0, 3);
         const on = active === i && (i > 0 || lakeClear);

@@ -125,11 +125,9 @@
 
 .step { z-index: 1; background: none; padding-bottom: 120px; pointer-events: none; }
 .step__text, .step__text * { pointer-events: auto; }
-/* the stretch of scroll that plays the journey slide turning into leaves: one screen, and one stop, per motion
-   (text to leaves, leaves to the water, V1 cleaning, V1 back to centre), played in proportion to the scroll */
-/* The leaf stretch: 4 motions at ~70svh each. vh keeps the pacing the same on every screen shape; the pixel
-   limits stop a small window making each motion over in 3 wheel notches or a tall monitor needing 60 notches. */
-.step--spacer { position: relative; display: block; height: clamp(2100px, 280svh, 3000px); padding: 0; }
+/* The journey slide's leaves are played by two scrolls (useJourneyGate), not by scroll distance, so this marker
+   step takes no room: it only sits at the top of the robots so the step indexes line up. */
+.step--spacer { position: relative; display: block; height: 0; padding: 0; }
 .step__grid { width: min(1200px, 100% - var(--gutter) * 2); margin-inline: auto; }
 .step__text { max-width: 500px; opacity: 0; transform: translate3d(0, 22px, 0); transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
 .step.is-active .step__text { opacity: 1; transform: none; transition-delay: 0.15s; }

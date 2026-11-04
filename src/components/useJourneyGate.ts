@@ -13,12 +13,30 @@ const FRESH_GAP = 140;
 /** the longest the tail of a gesture is swallowed after a hold ends */
 const FRESH_CAP = 450;
 
+/** ms V1 takes to sweep every leaf into its bin (the clock `u` going 0.5 to 0.75) */
+const SWEEP_MS = 1500;
+/** ms V1 then takes to glide back to the centre (u going 0.75 to 1) */
+const GLIDE_MS = 1000;
+/** the second scroll is the sweep and the glide, one after the other */
+const CLEAN_MS = SWEEP_MS + GLIDE_MS;
+
 const easeOutCubic = (k: number) => 1 - Math.pow(1 - k, 3);
+
+/**
+ * How far along its path (0..1) the clean-up has got after fraction `k` of its time. The sweep and the glide each
+ * cover half of the path but take different times, so the clock runs at two speeds; played backwards the glide
+ * comes first.
+ */
+function cleanProgress(k: number, forward: boolean) {
+  const split = (forward ? SWEEP_MS : GLIDE_MS) / CLEAN_MS;
+  return k < split ? 0.5 * (k / split) : 0.5 + 0.5 * ((k - split) / (1 - split));
+}
 
 /**
  * Steps the journey slide's clock `u` (written into `uRef`) in two scrolls instead of following the scrollbar:
  *  1st scroll: the words turn into leaves and fall to the water in about a second and a quarter;
- *  2nd scroll: V1 sweeps them up and glides to the centre, and the page stays put until that has finished.
+ *  2nd scroll: V1 sweeps them up in 1.5 seconds and glides to the centre in one more, and the page stays put until
+ *              that has finished.
  * After that the robots scroll natively, except that the page is held for a moment each time a robot reaches the top,
  * so they arrive one at a time. Scrolling back up replays the same steps in reverse.
  *
@@ -32,7 +50,7 @@ export function useJourneyGate(rootRef: RefObject<HTMLElement | null>, uRef: Mut
     const html = document.documentElement;
     // u at each rest, and how long the step from one to the next takes
     const levels = fast ? [0, 1] : [0, 0.5, 1];
-    const durs = fast ? [220] : [1250, 4000];
+    const durs = fast ? [220] : [1250, CLEAN_MS];
     const last = levels.length - 1;
 
     let stage = 0;
@@ -84,7 +102,8 @@ export function useJourneyGate(rootRef: RefObject<HTMLElement | null>, uRef: Mut
       raf = 0;
       if (!anim) return;
       const k = clamp((now - anim.t0) / anim.dur);
-      uRef.current = anim.from + (anim.to - anim.from) * (anim.dur < 2000 ? easeOutCubic(k) : k);
+      const along = anim.dur === CLEAN_MS ? cleanProgress(k, anim.to > anim.from) : easeOutCubic(k);
+      uRef.current = anim.from + (anim.to - anim.from) * along;
       if (k < 1) raf = requestAnimationFrame(tick);
       else anim = null;
     };

@@ -5,12 +5,14 @@ import Reveal from "../components/Reveal";
 import Roadmap from "../components/Roadmap";
 import WaterBackdrop from "../components/WaterBackdrop";
 import { useInView } from "../components/useInView";
+import { usePageMeta } from "../components/usePageMeta";
 import { ArrowRight } from "../components/Icons";
 import { bots, brand, nextUp, timeline } from "../data/content";
 import { photo } from "../data/photo";
 import { prefetch } from "../routes";
 
 export default function About() {
+  usePageMeta(null);
   const [videoOk, setVideoOk] = useState(true);
   const missionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);

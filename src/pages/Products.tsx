@@ -7,6 +7,7 @@ import Loader from "../components/Loader";
 import ModelViewer from "../components/ModelViewer";
 import ViewerBoundary from "../components/ViewerBoundary";
 import { useInView } from "../components/useInView";
+import { usePageMeta } from "../components/usePageMeta";
 import { ArrowDown, ArrowLeft, Cube } from "../components/Icons";
 import { bots } from "../data/content";
 import { photo } from "../data/photo";
@@ -70,6 +71,11 @@ export default function Products() {
 
   const ready = loaded >= bots.length || gaveUp;
 
+  usePageMeta(
+    bot ? `${bot.name}: ${bot.purpose}` : "Products",
+    bot ? bot.summary : "Four SCRUB robots, four jobs: explore each lake-cleaning robot in 3D, see what every part does and read its specifications.",
+  );
+
   useEffect(() => {
     const t = setTimeout(() => setGaveUp(true), GIVE_UP_MS);
     return () => clearTimeout(t);
@@ -118,10 +124,17 @@ export default function Products() {
     return () => window.removeEventListener("keydown", onKey);
   }, [selected, viewer, back]);
 
-  // a new robot starts at the top of the showroom
+  // A new robot starts at the top of the showroom. Without 3D there is no showroom to look at: the details
+  // are the response to picking a card, so bring them into view (a frame later, after the layout has reset the
+  // scroll position for a page change).
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }, [selected]);
+    if (canGL || !selected) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    const raf = requestAnimationFrame(() => document.getElementById("details")?.scrollIntoView({ behavior: "smooth" }));
+    return () => cancelAnimationFrame(raf);
+  }, [selected, canGL]);
 
   if (!canGL) {
     return (

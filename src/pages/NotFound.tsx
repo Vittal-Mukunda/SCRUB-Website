@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import { usePageMeta } from "../components/usePageMeta";
 
 export default function NotFound() {
+  usePageMeta("Page not found", undefined, true);
   return (
     <section className="page-hero page-hero--center">
       <div className="wrap">

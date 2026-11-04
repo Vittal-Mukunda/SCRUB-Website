@@ -1,25 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Reveal from "../components/Reveal";
+import { usePageMeta } from "../components/usePageMeta";
 import CountUp from "../components/CountUp";
-import { ArrowUpRight, Close, Play } from "../components/Icons";
+import Lightbox from "../components/Lightbox";
+import { ArrowUpRight, Play } from "../components/Icons";
 import { socialIcon } from "../components/socialIcon";
 import { gallery, impactStats, outlets, press, socials, timeline, youtubeId } from "../data/content";
 import { photo } from "../data/photo";
 
 export default function Impact() {
+  usePageMeta("Impact", "Where SCRUB has been seen, written about and put to work: press coverage, field photos and milestones from lake trials in Bengaluru.");
   const [playing, setPlaying] = useState(false);
   const [zoom, setZoom] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (zoom === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setZoom(null);
-      if (e.key === "ArrowRight") setZoom((z) => (z === null ? z : (z + 1) % gallery.length));
-      if (e.key === "ArrowLeft") setZoom((z) => (z === null ? z : (z + gallery.length - 1) % gallery.length));
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [zoom]);
 
   return (
     <>
@@ -72,18 +64,7 @@ export default function Impact() {
         </div>
       </section>
 
-      {zoom !== null && (
-        <div className="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" onClick={() => setZoom(null)}>
-          <button className="lightbox__x" aria-label="Close photo" onClick={() => setZoom(null)}><Close width={22} height={22} /></button>
-          <figure onClick={(e) => e.stopPropagation()}>
-            <img src={gallery[zoom].src} alt={gallery[zoom].alt} />
-            <figcaption>
-              <strong>{gallery[zoom].caption}</strong>
-              {gallery[zoom].credit && <small>{gallery[zoom].credit}</small>}
-            </figcaption>
-          </figure>
-        </div>
-      )}
+      {zoom !== null && <Lightbox index={zoom} onChange={setZoom} onClose={() => setZoom(null)} />}
 
       {/* PRESS */}
       <section className="section section--soft" aria-labelledby="press-title">
@@ -129,7 +110,7 @@ export default function Impact() {
                 />
               ) : (
                 <button className="video-frame__poster" onClick={() => setPlaying(true)} aria-label="Play the SCRUB V2 testing video">
-                  <img src={`https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`} alt="" loading="lazy" />
+                  <img src={`https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`} alt="" loading="lazy" onError={(e) => (e.currentTarget.style.visibility = "hidden")} />
                   <span className="video-frame__play"><Play width={28} height={28} /></span>
                 </button>
               )}

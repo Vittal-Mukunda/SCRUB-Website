@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import Logo from "./Logo";
 import { Close, Menu } from "./Icons";
@@ -18,11 +18,39 @@ const NAV = [
 export default function Layout() {
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
+  // the phone menu belongs to the page it was opened on, so changing page closes it
+  const [openAt, setOpenAt] = useState<string | null>(null);
+  const open = openAt === pathname;
+  const setOpen = (v: boolean) => setOpenAt(v ? pathname : null);
+
+  const mainRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const firstRoute = useRef(true);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    // keyboard and screen-reader users start the new page from its top, not from the link they pressed
+    if (firstRoute.current) firstRoute.current = false;
+    else mainRef.current?.focus({ preventScroll: true });
   }, [pathname]);
+
+  // the phone menu: Escape closes it (back to its button), and so does growing into the desktop layout
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpenAt(null);
+      toggleRef.current?.focus();
+    };
+    const wide = window.matchMedia("(min-width: 861px)");
+    const onWide = () => wide.matches && setOpenAt(null);
+    window.addEventListener("keydown", onKey);
+    wide.addEventListener("change", onWide);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      wide.removeEventListener("change", onWide);
+    };
+  }, [open]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -62,17 +90,18 @@ export default function Layout() {
           </nav>
 
           <button
+            ref={toggleRef}
             className="nav__toggle"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen(!open)}
           >
             {open ? <Close /> : <Menu />}
           </button>
         </div>
       </header>
 
-      <main id="main">
+      <main id="main" ref={mainRef} tabIndex={-1}>
         <Suspense fallback={<div className="route-wait" />}>
           <Outlet />
         </Suspense>

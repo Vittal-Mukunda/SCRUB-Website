@@ -143,7 +143,7 @@ export function layoutLeaves(specs: LeafSpec[], src: LeafSources, W: number, H: 
     } else {
       x = sp.fx * W;
       y = H * (0.25 + sp.fy * 0.5);
-      start.push(new THREE.Color("#1b3a29"));
+      start.push(new THREE.Color("#123B32"));
     }
     px[i] = x;
     sx[i] = (x - W / 2) * pxw;

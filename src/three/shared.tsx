@@ -146,9 +146,9 @@ export function blobTexture() {
   c.width = c.height = 128;
   const g = c.getContext("2d")!;
   const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  grad.addColorStop(0, "rgba(10,40,25,0.42)");
-  grad.addColorStop(0.55, "rgba(10,40,25,0.16)");
-  grad.addColorStop(1, "rgba(10,40,25,0)");
+  grad.addColorStop(0, "rgba(18,59,50,0.42)");
+  grad.addColorStop(0.55, "rgba(18,59,50,0.16)");
+  grad.addColorStop(1, "rgba(18,59,50,0)");
   g.fillStyle = grad;
   g.fillRect(0, 0, 128, 128);
   const t = new THREE.CanvasTexture(c);

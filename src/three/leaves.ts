@@ -68,7 +68,7 @@ export interface LeafField {
 
 /** Length (in u) of one leaf's turning into a leaf, and of its fall. */
 const A_DUR = 0.13;
-const B_DUR = 0.14;
+const B_DUR = 0.2;
 
 /** V1's leading edge, ahead of its centre, as a fraction of its footprint. */
 export const FRONT = 0.42;
@@ -162,9 +162,10 @@ export function layoutLeaves(specs: LeafSpec[], src: LeafSources, W: number, H: 
   const a0 = new Float32Array(n);
   const b0 = new Float32Array(n);
   for (let i = 0; i < n; i++) {
-    // both motions ripple through the words from left to right, each finishing within its own quarter
+    // both motions ripple through the words from left to right; the fall starts as the lift is finishing, so each
+    // leaf flies up and comes straight down in one continuous arc rather than hanging in between
     a0[i] = 0.01 + 0.07 * (px[i] / W) + rnd() * 0.03;
-    b0[i] = TL.leaves + 0.005 + 0.06 * (px[i] / W) + rnd() * 0.03;
+    b0[i] = TL.leaves - 0.065 + 0.06 * (px[i] / W) + rnd() * 0.03;
   }
   return { sx, sy, rx, a0, b0, len0, start, prevT: new Float32Array(n), colorMix: new Float32Array(n).fill(-1) };
 }

@@ -11,7 +11,7 @@ import type { ModelProps, RunRef, Vec3 } from "../types";
  *  - stainless square-tube frame, posts with black caps, L-brackets
  *  - white deck sheet; electronics under a clear polythene cover with a black-framed
  *    "S.C.R.U.B." plaque; blue and red wiring
- *  - two six-blade side paddle wheels hanging outboard of the hulls, diagonally opposite
+ *  - two six-blade side paddle wheels hanging outboard of the hulls, centred amidships and parallel
  */
 const L = 2.3; // hull length
 const R = 0.14; // hull radius
@@ -115,8 +115,8 @@ export default function V1({ ex, run }: ModelProps) {
           <Bx key={`e${x}`} size={[0.024, 0.024, 1.0]} pos={[x, 0.5, 0]} mat={M.stainless} r={0.004} />
         ))}
         {/* outrigger arms carrying the paddle wheels */}
-        <Bx size={[0.03, 0.03, 0.5]} pos={[-0.55, RAIL_Y + 0.02, 0.72]} mat={M.stainless} r={0.004} />
-        <Bx size={[0.03, 0.03, 0.5]} pos={[0.6, RAIL_Y + 0.02, -0.72]} mat={M.stainless} r={0.004} />
+        <Bx size={[0.03, 0.03, 0.5]} pos={[0, RAIL_Y + 0.02, 0.72]} mat={M.stainless} r={0.004} />
+        <Bx size={[0.03, 0.03, 0.5]} pos={[0, RAIL_Y + 0.02, -0.72]} mat={M.stainless} r={0.004} />
       </Part>
 
       {/* deck sheet, electronics and wiring */}
@@ -143,12 +143,12 @@ export default function V1({ ex, run }: ModelProps) {
         </mesh>
       </Part>
 
-      {/* paddle wheels, diagonally opposite and outboard of the hulls */}
+      {/* paddle wheels, centred on the boat's length, one outboard of each hull, axles in line and parallel */}
       <Part ex={ex} offset={[0, 0, 0.8]}>
-        <PaddleWheel x={-0.55} z={0.98} run={run} speed={2.4} />
+        <PaddleWheel x={0} z={0.98} run={run} speed={2.4} />
       </Part>
       <Part ex={ex} offset={[0, 0, -0.8]}>
-        <PaddleWheel x={0.6} z={-0.98} run={run} speed={2.4} />
+        <PaddleWheel x={0} z={-0.98} run={run} speed={2.4} />
       </Part>
     </group>
   );

@@ -17,9 +17,9 @@ export const hotspots: Record<string, Hotspot[]> = {
     {
       id: "paddles",
       label: "Paddle rotors",
-      pos: [-0.55, 0.74, 0.98],
+      pos: [0, 0.74, 0.98],
       title: "Paddle rotors",
-      text: "Bladed rotors at either end drive and steer the robot, churning through floating weeds as they go.",
+      text: "Bladed rotors on either side drive and steer the robot, churning through floating weeds as they go.",
     },
     {
       id: "control",

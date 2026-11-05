@@ -332,7 +332,7 @@ export function labelTexture(text: string) {
   g.lineWidth = 44;
   g.strokeRect(22, 22, 980, 468);
   g.fillStyle = "#101214";
-  g.font = "600 170px 'Space Grotesk', Arial, sans-serif";
+  g.font = "600 170px 'Sora', Arial, sans-serif";
   g.textAlign = "center";
   g.textBaseline = "middle";
   g.fillText(text, 512, 262);
@@ -351,7 +351,7 @@ export function decalMaterial(text: string, fg = "#101214", bg = "rgba(0,0,0,0)"
   g.fillStyle = bg;
   g.fillRect(0, 0, 512, 128);
   g.fillStyle = fg;
-  g.font = "700 74px 'Space Grotesk', Arial, sans-serif";
+  g.font = "700 74px 'Sora', Arial, sans-serif";
   g.textAlign = "center";
   g.textBaseline = "middle";
   g.fillText(text, 256, 66);

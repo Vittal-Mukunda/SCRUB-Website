@@ -32,9 +32,9 @@
   --line-soft: rgba(18, 59, 50, 0.08);
 
   /* self-hosted variable fonts (imported in main.tsx) */
-  --font-display: "Space Grotesk Variable", "Inter Variable", system-ui, sans-serif;
+  --font-display: "Sora Variable", "Inter Variable", system-ui, sans-serif;
   --font-body: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-mono: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif; /* brand: Inter Medium for captions, labels and UI (no third typeface) */
 
   --radius: 18px;
   --radius-sm: 12px;

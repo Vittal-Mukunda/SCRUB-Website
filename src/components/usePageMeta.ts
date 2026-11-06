@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const BRAND = "S.C.R.U.B. Robotics";
-const HOME_TITLE = `${BRAND} | Clean waters, cleaner future`;
+const HOME_TITLE = `${BRAND} | Clean water, better future`;
 
 function meta(name: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);

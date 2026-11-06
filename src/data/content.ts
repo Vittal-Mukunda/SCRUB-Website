@@ -175,7 +175,7 @@ export const bots: Bot[] = [
 /* ------------------------------ ABOUT ------------------------------ */
 
 export const brand = {
-  tagline: "Clean waters, cleaner future.",
+  tagline: "Clean water, better future.",
   subline: "Autonomous robots that take floating waste and algae out of our lakes.",
   mission:
     "India's lakes are choking on floating plastic and algae, and clearing them is still manual, slow and unsafe. SCRUB builds autonomous, affordable robots that lift surface waste and algae out of the water, and measure the water as they go, so every lake can be cleaned, monitored and trusted again.",

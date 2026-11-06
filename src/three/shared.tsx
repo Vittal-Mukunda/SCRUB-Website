@@ -6,10 +6,9 @@ import * as THREE from "three";
 import type { ModelProps } from "./types";
 import V1 from "./models/V1";
 import V2 from "./models/V2";
-import V3 from "./models/V3";
 import V4 from "./models/V4";
 
-export const MODELS: Record<string, ComponentType<ModelProps>> = { v1: V1, v2: V2, v3: V3, v4: V4 };
+export const MODELS: Record<string, ComponentType<ModelProps>> = { v1: V1, v2: V2, v4: V4 };
 
 /** Bounding info of a model in its own space, used to centre it and size it on screen. */
 export interface Fit {

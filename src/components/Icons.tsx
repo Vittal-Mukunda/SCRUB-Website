@@ -30,12 +30,6 @@ export const Mail = (p: SVGProps<SVGSVGElement>) => (
 export const Pin = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base} {...p}><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
 );
-export const Droplet = (p: SVGProps<SVGSVGElement>) => (
-  <svg {...base} {...p}><path d="M12 3s6 6.2 6 10.5A6 6 0 0 1 6 13.5C6 9.2 12 3 12 3Z" /></svg>
-);
-export const Leaf = (p: SVGProps<SVGSVGElement>) => (
-  <svg {...base} {...p}><path d="M5 19c0-9 5-14 15-14 0 10-5 15-14 15" /><path d="M5 19c3-4 6-7 10-9" /></svg>
-);
 export const Cube = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base} {...p}><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" /></svg>
 );

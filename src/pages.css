@@ -52,7 +52,7 @@
   .mission__caption { position: static; margin-top: 18px; }
 }
 
-/* 3. journey: the four robots on one line before the pinned steps begin */
+/* 3. journey: the robots on one line before the pinned steps begin */
 /* the journey slide lives on the pinned stage, so it can break apart where it stands */
 .intro { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; padding: calc(var(--nav-h) + 12px) 0 90px; pointer-events: auto; will-change: opacity; }
 .intro.is-gone { visibility: hidden; pointer-events: none; }
@@ -184,11 +184,11 @@
   .today__grid { grid-template-columns: 1fr; }
 }
 
-/* 9. CTA: heading, the four robots, button */
+/* 9. CTA: heading, the robots, button */
 .cta { background: var(--soft); text-align: center; justify-content: center; }
 .cta__inner { position: relative; z-index: 2; display: grid; justify-items: center; }
 .cta .btn { margin-top: clamp(24px, 4vh, 40px); }
-.cta__bots { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: clamp(24px, 5vh, 52px); text-align: left; }
+.cta__bots { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: clamp(24px, 5vh, 52px); text-align: left; }
 .cta-bot { display: flex; flex-direction: column; height: 100%; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: #fff; color: var(--tx); box-shadow: 0 20px 44px -36px rgba(18, 59, 50, 0.6); transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s; }
 .cta-bot:hover, .cta-bot:focus-visible { transform: translateY(-5px); border-color: var(--green-line); box-shadow: 0 28px 56px -34px rgba(18, 59, 50, 0.55); }
 .cta-bot__media { display: block; height: clamp(120px, 30vh, 280px); background: var(--soft-2); overflow: hidden; }
@@ -199,7 +199,7 @@
 .cta-bot strong { font-family: var(--font-display); font-size: 1.15rem; letter-spacing: -0.01em; }
 .cta-bot__purpose { color: var(--tx-dim); font-size: 0.9rem; }
 @media (max-width: 860px) {
-  .cta__bots { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .cta__bots { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .cta-bot__media { height: clamp(96px, 18vh, 160px); }
   .cta-bot__text { padding: 10px 12px 14px; }
   .cta-bot strong { font-size: 1rem; }
@@ -218,7 +218,7 @@
 .showroom__canvas canvas { display: block; touch-action: pan-y; }
 .showroom__fallback { position: absolute; inset: 0; overflow: auto; padding: 24px var(--gutter); background: var(--bg); }
 
-/* the four display cards: landscape, 2 x 2, robot on the left and text on the right */
+/* the display cards: three tall cards side by side on desktop (robot above, text below), landscape rows on phones */
 .pgrid { position: absolute; left: 50%; transform: translateX(-50%); top: 14px; bottom: 24px; width: min(1280px, 100% - var(--gutter) * 2); display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 18px; transition: opacity 0.5s; }
 .pgrid--bg { z-index: 0; }
 .pgrid--fg { z-index: 2; }
@@ -234,10 +234,16 @@
 .pcard__text strong { font-family: var(--font-display); font-size: clamp(1.3rem, 2vw, 1.8rem); letter-spacing: -0.01em; line-height: 1.1; }
 .pcard__purpose { color: var(--tx-dim); font-size: clamp(0.88rem, 1.1vw, 1rem); }
 .pcard__text small { margin-top: 10px; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-deep); display: inline-flex; align-items: center; gap: 6px; }
+@media (min-width: 900px) {
+  .pgrid { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr; top: 50%; bottom: auto; height: min(calc(100% - 38px), 620px); transform: translate(-50%, -50%); }
+  .pcard { grid-template-columns: 1fr; grid-template-rows: 1.15fr auto; text-align: center; align-items: start; padding-bottom: clamp(22px, 4vh, 44px); }
+  .pcard__text { justify-items: center; }
+  .pcard__top { justify-content: center; }
+}
 @media (max-width: 899px) {
   .showroom { height: auto; min-height: 100svh; }
   .showroom__stage { min-height: 760px; }
-  .pgrid { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); gap: 12px; }
+  .pgrid { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); gap: 12px; }
   .pcard { padding: 12px 16px; }
   .pcard__top em { display: none; }
   .pcard__text strong { font-size: 1.15rem; }

@@ -103,53 +103,10 @@ export function Rod({ a, b, r = 0.015, mat }: { a: Vec3; b: Vec3; r?: number; ma
   );
 }
 
-/** Hex bolt with washer, axis +Y. */
-export function Bolt({ pos, rot = [0, 0, 0], r = 0.008, mat }: Common & { r?: number }) {
-  return (
-    <group position={pos} rotation={rot}>
-      <mesh position={[0, 0.002, 0]} material={mat}>
-        <cylinderGeometry args={[r * 1.7, r * 1.7, r * 0.3, 20]} />
-      </mesh>
-      <mesh position={[0, r * 0.55, 0]} material={mat}>
-        <cylinderGeometry args={[r, r, r * 0.8, 6]} />
-      </mesh>
-    </group>
-  );
-}
-
 /** Cable run through the given points. */
 export function Cable({ points, r = 0.006, mat }: { points: Vec3[]; r?: number; mat: THREE.Material }) {
   const geo = useMemo(() => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)), false, "catmullrom", 0.4), 48, r, 10, false), [points, r]);
   return <mesh geometry={geo} material={mat} />;
-}
-
-/** Horizontal PVC pipe along X: end collars, domed caps and optional mid-pipe couplers. */
-export function Pipe({ length, r, pos = [0, 0, 0], mat, capMat = mat, couplers = [] }: { length: number; r: number; pos?: Vec3; mat: THREE.Material; capMat?: THREE.Material; couplers?: number[] }) {
-  return (
-    <group position={pos}>
-      <mesh rotation={[0, 0, Math.PI / 2]} material={mat}>
-        <cylinderGeometry args={[r, r, length, 56]} />
-      </mesh>
-      {[-1, 1].map((s) => (
-        <group key={s}>
-          <mesh position={[s * (length / 2 - r * 0.28), 0, 0]} rotation={[0, 0, Math.PI / 2]} material={capMat}>
-            <cylinderGeometry args={[r * 1.075, r * 1.075, r * 0.56, 56]} />
-          </mesh>
-          <mesh position={[s * (length / 2 - r * 0.02), 0, 0]} rotation={[0, 0, (s * Math.PI) / 2]} material={capMat}>
-            <cylinderGeometry args={[r * 0.9, r * 1.075, r * 0.1, 56]} />
-          </mesh>
-          <mesh position={[s * (length / 2 + r * 0.01), 0, 0]} scale={[0.16, 1, 1]} material={capMat}>
-            <sphereGeometry args={[r * 0.9, 40, 24]} />
-          </mesh>
-        </group>
-      ))}
-      {couplers.map((c) => (
-        <mesh key={c} position={[c * length, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={mat}>
-          <cylinderGeometry args={[r * 1.06, r * 1.06, r * 0.9, 56]} />
-        </mesh>
-      ))}
-    </group>
-  );
 }
 
 /** Aluminium T-slot extrusion along X. */
@@ -267,65 +224,6 @@ export function Prop({ run, blades = 3, length = 0.12, chordRoot = 0.05, chordTi
           <mesh geometry={geo} position={[hubR * 0.85, 0, 0]} material={mat} />
         </group>
       ))}
-    </group>
-  );
-}
-
-/** Flat-plate paddle rotor (V1 style): bevelled metal plates on a hub, spins about local Y. */
-export function Rotor({ run, blades = 4, length = 0.4, chord = 0.12, thick = 0.014, pitch = 0.5, speed = 9, hub = 0.04, mat, hubMat }: { run: RunRef; blades?: number; length?: number; chord?: number; thick?: number; pitch?: number; speed?: number; hub?: number; mat: THREE.Material; hubMat: THREE.Material }) {
-  const g = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
-    if (g.current && run.current) g.current.rotation.y += speed * dt;
-  });
-  return (
-    <group ref={g}>
-      <mesh material={hubMat}>
-        <cylinderGeometry args={[hub, hub, chord * 0.95, 32]} />
-      </mesh>
-      <mesh position={[0, chord * 0.5, 0]} material={hubMat}>
-        <cylinderGeometry args={[hub * 1.15, hub * 1.15, 0.012, 32]} />
-      </mesh>
-      {Array.from({ length: blades }, (_, i) => (
-        <group key={i} rotation={[0, (i / blades) * Math.PI * 2, 0]}>
-          <group position={[length / 2 + hub * 0.7, 0, 0]} rotation={[pitch, 0, 0]}>
-            <mesh geometry={roundedBox(length, thick, chord, thick * 0.45, 2)} material={mat} />
-          </group>
-          <mesh position={[hub * 1.5, 0, 0]} rotation={[pitch, 0, Math.PI / 2]} material={hubMat}>
-            <cylinderGeometry args={[0.009, 0.009, chord * 0.5, 6]} />
-          </mesh>
-        </group>
-      ))}
-    </group>
-  );
-}
-
-/** Real corrugated sheet (geometry, not a texture), in the XY plane, waves running along X. */
-export function Corrugated({ w, h, waves = 16, amp = 0.012, pos = [0, 0, 0], rot = [0, 0, 0], mat }: Common & { w: number; h: number; waves?: number; amp?: number }) {
-  const geo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(w, h, waves * 10, 1);
-    const p = g.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < p.count; i++) p.setZ(i, amp * Math.sin((p.getX(i) / w + 0.5) * waves * Math.PI * 2));
-    g.computeVertexNormals();
-    return g;
-  }, [w, h, waves, amp]);
-  return <mesh geometry={geo} position={pos} rotation={rot} material={mat} />;
-}
-
-/** Cylindrical motor can with cooling-fin rings, axis +Y. */
-export function Motor({ r, h, pos = [0, 0, 0], rot = [0, 0, 0], mat, fins = 5 }: Common & { r: number; h: number; fins?: number }) {
-  return (
-    <group position={pos} rotation={rot}>
-      <mesh material={mat}>
-        <cylinderGeometry args={[r, r, h, 40]} />
-      </mesh>
-      {Array.from({ length: fins }, (_, i) => (
-        <mesh key={i} position={[0, -h * 0.35 + (i * h * 0.7) / Math.max(1, fins - 1), 0]} material={mat}>
-          <cylinderGeometry args={[r * 1.06, r * 1.06, h * 0.045, 40]} />
-        </mesh>
-      ))}
-      <mesh position={[0, h / 2 + 0.004, 0]} material={mat}>
-        <cylinderGeometry args={[r * 0.55, r * 0.7, 0.01, 28]} />
-      </mesh>
     </group>
   );
 }

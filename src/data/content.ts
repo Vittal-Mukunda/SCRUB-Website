@@ -4,7 +4,7 @@
  * and must be confirmed or replaced by the team before the tech summit.
  */
 
-export type BotId = "v1" | "v2" | "v3" | "v4";
+export type BotId = "v1" | "v2" | "v4";
 
 export interface Feature {
   title: string;
@@ -77,18 +77,18 @@ export const bots: Bot[] = [
       { src: "/media/bots/v1/cover.webp", caption: "SCRUB V1" },
     ],
     features: [
-      { title: "Conveyor collection", text: "Lifts floating waste and aquatic weeds out of the water into an onboard hold." },
+      { title: "Conveyor collection", text: "An inclined belt lifts floating waste and aquatic weeds out of the water and into a basket." },
       { title: "Dual-mode control", text: "Operate it by remote or hand over to autonomous sweeping patterns." },
-      { title: "Solar-assisted", text: "Solar panels extend working time between charges on open water." },
+      { title: "Drain-through basket", text: "A perforated basket holds the catch and lets the water run straight back to the lake.", draft: true },
       { title: "Twin-hull stability", text: "Wide, stable catamaran stance for calm handling in light chop.", draft: true },
-      { title: "Weed-cutting paddles", text: "Paddle-wheel propulsion that churns through floating vegetation.", draft: true },
-      { title: "Field-serviceable", text: "Aluminium-extrusion frame so a small team can repair it on the bank.", draft: true },
+      { title: "Wide pontoons", text: "Broad twin pontoons carry the conveyor and basket between them.", draft: true },
+      { title: "Field-serviceable", text: "Aluminium T-slot frame so a small team can repair it on the bank.", draft: true },
     ],
     specs: [
-      { label: "Hull", value: "Twin PVC pipe hulls" },
-      { label: "Propulsion", value: "Dual paddle wheels" },
+      { label: "Hull", value: "Twin pontoons" },
+      { label: "Collection", value: "Inclined conveyor into a mesh basket" },
       { label: "Control", value: "Dual-mode (manual + autonomous)" },
-      { label: "Power", value: "Battery, solar-assisted" },
+      { label: "Propulsion", value: "To be confirmed", draft: true },
       { label: "Payload", value: "To be confirmed", draft: true },
       { label: "Endurance", value: "To be confirmed", draft: true },
     ],
@@ -135,42 +135,6 @@ export const bots: Bot[] = [
     ],
   },
   {
-    id: "v3",
-    name: "SCRUB V3",
-    purpose: "Rivers & canals",
-    roadmap: {
-      when: "Aug 2026",
-      headline: "Let the river do the work.",
-      story:
-        "On flowing water, chasing debris is the wrong game. V3 is a floating boom that steers drifting waste to a shore-side collection point, built for rivers, canals and storm-water channels. Still in development.",
-      draft: true,
-    },
-    environment: "Flowing water, storm-water channels",
-    status: "In development",
-    summary:
-      "A floating-boom interceptor. Instead of chasing debris, it guides drifting waste towards a shore-side collection point, built for rivers and canals where flow does the delivering.",
-    cover: "/media/bots/v3/cover.webp",
-    focus: "50% 50%",
-    gallery: ["/media/bots/v3/cover.webp"],
-    photos: [{ src: "/media/bots/v3/cover.webp", caption: "Design render: boom, ramp, tank and shelter", credit: "SCRUB pitch deck" }],
-    features: [
-      { title: "Floating boom", text: "A line of buoyant floats that steers debris towards the bank." },
-      { title: "Shore collection point", text: "Debris is lifted out at a sheltered station on the bank." },
-      { title: "Modular interception", text: "Boom sections can be extended to suit channel width." },
-      { title: "Flood-ready", text: "Designed to ride out the changing water levels of monsoon.", draft: true },
-      { title: "Low-energy operation", text: "Uses river flow to deliver waste, so power draw stays low.", draft: true },
-      { title: "Debris sensing", text: "Counts and logs what it intercepts for municipal reporting.", draft: true },
-    ],
-    specs: [
-      { label: "Concept", value: "Floating-boom interceptor" },
-      { label: "Deployment", value: "Canals, rivers, outfalls" },
-      { label: "Collection", value: "Shore-based station" },
-      { label: "Stage", value: "In development" },
-      { label: "Boom length", value: "To be confirmed", draft: true },
-      { label: "Capacity", value: "To be confirmed", draft: true },
-    ],
-  },
-  {
     id: "v4",
     name: "SCRUB V4",
     purpose: "Water intelligence",
@@ -208,8 +172,6 @@ export const bots: Bot[] = [
   },
 ];
 
-export const getBot = (id: string | undefined) => bots.find((b) => b.id === id);
-
 /* ------------------------------ ABOUT ------------------------------ */
 
 export const brand = {
@@ -225,10 +187,9 @@ export const brand = {
   videoSrc: "/media/videos/mission.mp4",
 };
 
-/** What comes after the four robots, shown at the end of the journey scroll. Both are team-confirmable drafts. */
-export const nextUp = [
+/** What comes after the three robots, shown at the end of the journey scroll. Team-confirmable drafts. */
+export const nextUp: { title: string; text: string; draft?: boolean }[] = [
   { title: "Doddathoguru Lake", text: "The Electronic City survey on 29 Oct 2026 scoped our next lake deployment." },
-  { title: "V3 into the water", text: "Moving the river and canal interceptor from design towards field trials.", draft: true },
 ];
 
 /* ------------------------------ IMPACT ------------------------------ */
@@ -279,7 +240,7 @@ export const socials = [
 export const impactStats = [
   { value: 7, suffix: "", label: "Media outlets have covered SCRUB" },
   { value: 3, suffix: "", label: "Lakes visited for trials and surveys" },
-  { value: 4, suffix: "", label: "Robot platforms, V1 to V4" },
+  { value: 3, suffix: "", label: "Robot platforms" },
   { value: 25, suffix: " kg", label: "V2 waste capacity per run (as reported)" },
 ];
 

@@ -61,8 +61,15 @@ export interface LeafField {
   startX: number;
   endX: number;
   restX: number;
-  /** height of V1's bin above the water */
-  binH: number;
+  /** how far left of V1's centre its intake (the belt's low end) is, in world units */
+  front: number;
+  /** horizontal span of the belt from the intake towards V1's centre */
+  ramp: number;
+  /** the belt's centre line relative to V1's centre: low end and top end as (along the lake, height, across) */
+  beltLow: [number, number, number];
+  beltTop: [number, number, number];
+  /** slope of the belt in the scene (radians) */
+  rampPitch: number;
   tilt: number;
 }
 
@@ -70,14 +77,8 @@ export interface LeafField {
 const A_DUR = 0.13;
 const B_DUR = 0.2;
 
-/** V1's leading edge, ahead of its centre, as a fraction of its footprint. */
-export const FRONT = 0.42;
-/** distance (fraction of footprint) a leaf rides up the conveyor from the intake to the bin */
-const RAMP = 0.36;
 /** how far ahead of the intake the bow wave starts nudging leaves */
 const PUSH = 0.2;
-/** the conveyor's slope */
-const RAMP_PITCH = 0.55;
 
 /** One leaf in this many stays on the lake for V1 to collect; the rest are crumbs that sink as they land. */
 export const KEEP_EVERY = 5;
@@ -179,7 +180,12 @@ export function sweepX(u: number, f: LeafField) {
 }
 
 /** Where V1 must stop so that its conveyor has carried even the left-most leaf into the bin. */
-export const sweepEndFor = (leftW: number, unit: number) => leftW + (FRONT - RAMP - 0.02) * unit;
+export const sweepEndFor = (leftW: number, front: number, ramp: number, unit: number) => leftW + front - ramp - 0.02 * unit;
+
+/** V1's heading while it sweeps: bow to the left, mostly side-on so the belt shows in profile. */
+export const SWEEP_YAW = Math.PI + 0.3;
+/** Its yaw on the journey slide: held through the sweep, then eased to the robot's show angle while it backs to its spot. */
+export const sweepYaw = (u: number, showYaw: number) => SWEEP_YAW + (showYaw - SWEEP_YAW) * smooth(TL.sweepEnd, TL.botBack, u);
 
 /** A leaf outline with a pointed tip, UV-mapped so a vein texture lines up. */
 export function leafGeometry() {
@@ -268,13 +274,14 @@ export function updateLeaves(mesh: THREE.InstancedMesh, specs: LeafSpec[], lay: 
   QG.setFromAxisAngle(X_AXIS, f.tilt);
   // lying flat on the water, and tipped up the conveyor
   QFLAT.copy(QG).multiply(QA.setFromAxisAngle(X_AXIS, -Math.PI / 2));
-  QRAMP.copy(QG).multiply(QA.setFromAxisAngle(Z_AXIS, RAMP_PITCH)).multiply(QF.setFromAxisAngle(X_AXIS, -Math.PI / 2));
+  QRAMP.copy(QG).multiply(QA.setFromAxisAngle(Z_AXIS, f.rampPitch)).multiply(QF.setFromAxisAngle(X_AXIS, -Math.PI / 2));
   const U = f.unit;
   const L = f.leafLen;
   const botX = sweepX(u, f);
   // the furthest V1 has got: a leaf it has passed stays collected while it turns back
-  const frontMin = (u <= TL.sweepEnd ? botX : f.endX) - FRONT * U;
-  const frontNow = botX - FRONT * U;
+  const frontMin = (u <= TL.sweepEnd ? botX : f.endX) - f.front;
+  const [bx0, bh0, bz0] = f.beltLow;
+  const [bx1, bh1, bz1] = f.beltTop;
   const show = smooth(0, 0.02, u);
   let colours = false;
 
@@ -324,7 +331,7 @@ export function updateLeaves(mesh: THREE.InstancedMesh, specs: LeafSpec[], lay: 
     // ---- where it ends up: floating on the water, drifting a little ----
     const fl = smooth(0.85, 1, tb);
     const restX = f.leftW + lay.rx[i] * (f.rightW - f.leftW);
-    const restZ = sp.rz * f.bandZ;
+    const restZ = bz0 + sp.rz * f.bandZ; // the band of leaves lies in line with the belt's intake
     let lx = restX + fl * Math.sin(time * 0.23 + sp.phase) * 0.012 * U;
     let lz = restZ + fl * Math.cos(time * 0.19 + sp.phase) * 0.01 * U;
     let lh = 0.008 * U + fl * Math.sin(time * 1.3 + sp.phase) * 0.0025 * U;
@@ -332,21 +339,21 @@ export function updateLeaves(mesh: THREE.InstancedMesh, specs: LeafSpec[], lay: 
     // ---- motion 3: V1 reaching it (bow wave, then the conveyor) ----
     const d = restX - frontMin; // > 0 once the intake has passed this leaf
     const push = smooth(-PUSH * U, 0, d);
-    const c = clamp(d / (RAMP * U));
+    const c = clamp(d / f.ramp);
     if (c >= 1) {
       mesh.setMatrixAt(i, ZERO);
       continue;
     }
     if (push > 0) {
       lx -= push * 0.035 * U; // carried ahead by the bow wave
-      lz *= 1 - 0.55 * push; // and funnelled into the intake between the hulls
+      lz = bz0 + (lz - bz0) * (1 - 0.55 * push); // and funnelled onto the belt's intake
     }
     if (c > 0) {
-      // riding the conveyor: from the intake up to the bin, moving with the robot
+      // riding the belt: the leaf is picked up at the low end and carried up its running surface to the basket
       const ride = smooth(0, 0.14, c);
-      lx += (frontNow + c * (FRONT - 0.06) * U - lx) * ride;
-      lz += (0 - lz) * c;
-      lh += (Math.pow(c, 1.25) * f.binH - lh) * ride;
+      lx += (botX + bx0 + c * (bx1 - bx0) - lx) * ride;
+      lz += (bz0 + c * (bz1 - bz0) + sp.rz * f.bandZ * (1 - 0.4 * c) - lz) * ride; // still spread across the belt, easing in as it nears the basket
+      lh += (bh0 + c * (bh1 - bh0) - lh) * ride;
     }
     const X1 = lx;
     const Y1 = f.groundY + lh * cosT - lz * sinT;

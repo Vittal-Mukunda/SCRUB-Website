@@ -139,13 +139,13 @@ export default function About() {
         </div>
       </section>
 
-      {/* 9. CTA: the four robots, each a way into the showroom */}
+      {/* 9. CTA: the robots, each a way into the showroom */}
       <section className="slide cta" aria-labelledby="cta-title">
         <WaterBackdrop intensity="soft" />
         <div className="wrap cta__inner">
           <Reveal>
-            <h2 id="cta-title" className="display">Four robots. One mission.</h2>
-            <p className="lead lead--center">From big lakes to flowing canals, see what each SCRUB does.</p>
+            <h2 id="cta-title" className="display">Three robots. One mission.</h2>
+            <p className="lead lead--center">From big lakes to compact survey boats, see what each SCRUB does.</p>
           </Reveal>
           <ul className="cta__bots">
             {bots.map((b, i) => (

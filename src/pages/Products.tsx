@@ -50,7 +50,7 @@ export default function Products() {
   const bot = bots.find((b) => b.id === selected) ?? null;
   // The 360° viewer lives in the URL (?bot=v1&view=3d) as its own history step, so the browser's Back
   // button closes it. Kept in component state it outlived Back: the viewer vanished with the robot, but
-  // the showroom stayed paused behind it and the four robots never came back.
+  // the showroom stayed paused behind it and the robots never came back.
   const viewer = !!selected && params.get("view") === "3d";
   const navigate = useNavigate();
   const location = useLocation();
@@ -73,7 +73,7 @@ export default function Products() {
 
   usePageMeta(
     bot ? `${bot.name}: ${bot.purpose}` : "Products",
-    bot ? bot.summary : "Four SCRUB robots, four jobs: explore each lake-cleaning robot in 3D, see what every part does and read its specifications.",
+    bot ? bot.summary : "Three SCRUB robots, three jobs: explore each lake-cleaning robot in 3D, see what every part does and read its specifications.",
   );
 
   useEffect(() => {
@@ -143,7 +143,7 @@ export default function Products() {
           <div className="wrap">
             <Reveal>
               <p className="eyebrow">Products</p>
-              <h1 className="display">Four robots, four jobs.</h1>
+              <h1 className="display">Three robots, three jobs.</h1>
               <p className="lead">Each SCRUB is built for a different kind of water.</p>
             </Reveal>
           </div>
@@ -163,7 +163,7 @@ export default function Products() {
 
         <header className="showroom__head">
           <p className="eyebrow">Products</p>
-          <h1 className="display display--md">Four robots, four jobs.</h1>
+          <h1 className="display display--md">Three robots, three jobs.</h1>
           <p className="showroom__hint">Choose a robot to bring it to the centre and see what each part does.</p>
         </header>
 

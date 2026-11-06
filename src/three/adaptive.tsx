@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { renderWithAO } from "./ao";
 import { MIN_DPR, topDpr } from "./dpr";
 
 const STEP = 0.25;
@@ -32,7 +33,11 @@ export function AdaptiveResolution({ max, onDpr, halfRate = true }: { max: numbe
     const st = (state.current ??= init());
     const rung = st.rungs[st.i];
     st.odd = !st.odd;
-    if (!rung.half || st.odd) gl.render(scene, camera);
+    if (!rung.half || st.odd) {
+      // ambient occlusion only on the best two rungs: when frames drop, it is the first thing to go
+      if (st.i <= 1) renderWithAO(gl, scene, camera);
+      else gl.render(scene, camera);
+    }
 
     // a hitch (shader compile, texture upload, tab switch, resuming from pause), not the steady rate
     if (dt > 0.25) return;

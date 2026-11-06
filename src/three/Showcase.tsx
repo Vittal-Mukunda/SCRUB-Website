@@ -6,8 +6,10 @@ import { bots } from "../data/content";
 import type { BotId } from "../data/content";
 import { hotspots } from "./hotspots";
 import { loadedScans } from "./mat";
+import { REL_SIZE } from "./sizes";
 import { blobTexture, Lights, Stand } from "./shared";
 import { AdaptiveResolution } from "./adaptive";
+import { compileAsyncAO, renderWithAO } from "./ao";
 import { topDpr } from "./dpr";
 import type { Fit } from "./shared";
 
@@ -44,7 +46,7 @@ export interface ShowcaseProps {
 }
 
 /** Yaw (radians) each robot eases to when it is shown off, picked so its features face the camera. */
-const SHOW_YAW: Record<BotId, number> = { v1: 0.5, v2: 0.55, v3: 0.35, v4: 0.55 };
+const SHOW_YAW: Record<BotId, number> = { v1: -0.75, v2: -0.5, v4: 0.55 };
 /** Display tilt: leans the turntable towards the camera so the tops of the robots can be seen. */
 const TILT = 0.4;
 
@@ -112,7 +114,7 @@ function Stage({ selected, paused, revealed, cellsRef, hoverRef, onSelect, onOpe
       return () => hidden.forEach((a) => (a.visible = false));
     };
     let restore = showAll();
-    const done = gl.compileAsync(scene, camera);
+    const done = compileAsyncAO(gl, scene, camera);
     restore();
     // then upload the material scans to the GPU, one per task, instead of all in the first frame
     const upload = async () => {
@@ -127,7 +129,7 @@ function Stage({ selected, paused, revealed, cellsRef, hoverRef, onSelect, onOpe
     const warm = () => {
       if (!alive) return;
       restore = showAll();
-      gl.render(scene, camera);
+      renderWithAO(gl, scene, camera);
       restore();
     };
     done
@@ -159,10 +161,22 @@ function Stage({ selected, paused, revealed, cellsRef, hoverRef, onSelect, onOpe
     if (!f || !cell) return { x: 0, y: 0, scale: 0 };
     const e = extent(f);
     // card layout: model in the left ~55%, text on the right
-    const cx = cell.x + cell.w * 0.27;
-    const slotScale = Math.min((cell.w * 0.48 * px) / e.w, (cell.h * 0.68 * px) / e.h);
+    // tall cards (desktop): model above the text; wide cards (phones): model on the left
+    const tall = cell.h > cell.w * 1.1;
+    const cx = cell.x + cell.w * (tall ? 0.5 : 0.27);
+    // every robot at its real size next to the others: the one needing the most room just fits its card
+    const fitIn = (g: Fit, c: Cell) => {
+      const eg = extent(g);
+      return c.h > c.w * 1.1 ? Math.min((c.w * 0.92 * px) / eg.w, (c.h * 0.46 * px) / eg.h) : Math.min((c.w * 0.48 * px) / eg.w, (c.h * 0.68 * px) / eg.h);
+    };
+    let foot = Infinity;
+    slots.current.forEach((sl, j) => {
+      const cj = cellsRef.current[j];
+      if (sl.fit && cj) foot = Math.min(foot, (fitIn(sl.fit, cj) * sl.fit.d) / (REL_SIZE[bots[j].id] ?? 1));
+    });
+    const slotScale = (foot * (REL_SIZE[bots[i].id] ?? 1)) / f.d;
     const slotH = (e.h * slotScale) / px; // apparent height in px
-    const groundPy = cell.y + cell.h * 0.5 + slotH * 0.28;
+    const groundPy = cell.y + cell.h * (tall ? 0.37 : 0.5) + slotH * 0.28;
     const sx = (cx - size.width / 2) * px;
     const sy = -(groundPy - size.height / 2) * px;
     if (!revealed) return { x: sx, y: sy, scale: 0 };

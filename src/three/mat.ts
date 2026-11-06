@@ -1,15 +1,10 @@
 import * as THREE from "three";
-import { noiseMap, speckleColor } from "./textures";
+import { noiseMap } from "./textures";
 
 type P = THREE.MeshPhysicalMaterialParameters;
 const phys = (color: string, o: P = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.5, metalness: 0, ...o });
 
 /* shared data maps */
-const scuff = noiseMap({ cells: 5, octaves: 5, seed: 3, lo: 150, hi: 255, scratches: 70, repeat: 2 }); // roughness variation (marks, scuffs)
-const grain = noiseMap({ size: 256, cells: 48, octaves: 3, seed: 8, lo: 90, hi: 170, repeat: 6 }); // fine plastic grain (bump)
-const sandMap = speckleColor([202, 189, 160], 34, 512, 5, 11);
-const concreteMap = speckleColor([158, 158, 150], 22, 512, 4, 17);
-const rough = noiseMap({ cells: 9, octaves: 5, seed: 29, lo: 100, hi: 255, repeat: 3 });
 
 /**
  * Shared material palette. Colours are real-world albedos (metals: their reflectance colour), matched to
@@ -21,49 +16,32 @@ export const M = {
   pvcWhite: phys("#dcdcd5", { roughness: 0.42 }),
   black: phys("#1c1e20", { roughness: 0.5 }),
   blackGloss: phys("#121416", { roughness: 0.22, clearcoat: 0.7, clearcoatRoughness: 0.08 }),
-  rubber: phys("#1d1e20", { roughness: 0.82, specularIntensity: 0.5, sheen: 0.5, sheenColor: new THREE.Color("#5a5c60"), sheenRoughness: 0.75 }),
-  alu: phys("#e4e7ea", { metalness: 1, roughness: 0.34 }),
   steelDark: phys("#8f969a", { metalness: 1, roughness: 0.42 }),
   postGrey: phys("#b3b8ba", { metalness: 1, roughness: 0.36 }),
   stainless: phys("#c5c8ca", { metalness: 1, roughness: 0.27 }),
-  pontoon: phys("#b9bdc0", { metalness: 1, roughness: 0.33 }),
   /** grey PVC drain pipe (V1 hulls) and its lighter moulded end caps */
-  pvcPipeGrey: phys("#a3a5a1", { roughness: 0.36 }),
-  pvcCap: phys("#c5c7c4", { roughness: 0.3 }),
   /** white PVC pipe (V2 hulls) */
-  pvcCream: phys("#e2e1db", { roughness: 0.3 }),
-  polythene: phys("#eef3ff", { roughness: 0.42, transmission: 0.55, thickness: 0.02, ior: 1.3, attenuationColor: new THREE.Color("#dbe6ff"), attenuationDistance: 0.6 }),
   binPlastic: phys("#c4d0ff", { roughness: 0.1, transparent: true, opacity: 0.32, clearcoat: 1, clearcoatRoughness: 0.05, side: THREE.DoubleSide, depthWrite: false }),
-  cableBlue: phys("#2f62e6", { roughness: 0.38, clearcoat: 0.3, clearcoatRoughness: 0.3 }),
-  cableRed: phys("#d8352a", { roughness: 0.38, clearcoat: 0.3, clearcoatRoughness: 0.3 }),
-  pcbBlue: phys("#1f4fb5", { roughness: 0.45, clearcoat: 0.5 }),
-  rollerBrown: phys("#5b4030", { roughness: 0.8, bumpMap: grain, bumpScale: 1.2 }),
-  orangeTape: phys("#f08a2c", { roughness: 0.55, roughnessMap: scuff }),
-  redLabel: phys("#d6253a", { roughness: 0.5, clearcoat: 0.3 }),
-  yellowFace: phys("#e6ae00", { roughness: 0.4, clearcoat: 0.3, clearcoatRoughness: 0.2 }),
-  orange: phys("#e8632b", { roughness: 0.4, clearcoat: 0.5, clearcoatRoughness: 0.2 }),
-  yellow: phys("#dba21c", { roughness: 0.38, clearcoat: 0.3, clearcoatRoughness: 0.2 }),
-  boardWhite: phys("#d9d9d4", { roughness: 0.6 }),
   deckWhite: phys("#d8d7d2", { roughness: 0.45 }),
   plateWarm: phys("#d9d5cd", { roughness: 0.42 }),
-  sand: phys("#ffffff", { map: sandMap, roughness: 1, roughnessMap: rough, bumpMap: rough, bumpScale: 2 }),
-  concrete: phys("#ffffff", { map: concreteMap, roughness: 0.95, roughnessMap: rough, bumpMap: rough, bumpScale: 1.2 }),
+  /** CAD-render palette (V2, V4): clean flat colours, no weathering */
+  cadBlue: phys("#1768ac", { roughness: 0.36, clearcoat: 0.3, clearcoatRoughness: 0.25 }),
+  cadBlueDeep: phys("#124f88", { roughness: 0.4, clearcoat: 0.25, clearcoatRoughness: 0.3 }),
+  cadBlueFloor: phys("#1c74bf", { roughness: 0.55 }),
+  hullTeal: phys("#15506f", { roughness: 0.5, clearcoat: 0.15, clearcoatRoughness: 0.4 }),
+  binGrey: phys("#767a7e", { metalness: 0.6, roughness: 0.5 }),
+  roofGrey: phys("#d5d7d7", { roughness: 0.5 }),
+  sheetSilver: phys("#d9dcde", { metalness: 0.55, roughness: 0.38 }),
+  bandDark: phys("#2a2c2e", { roughness: 0.5 }),
+  tubLip: phys("#3b3f43", { roughness: 0.5 }),
+  tubLiner: phys("#c4c8cb", { roughness: 0.5 }),
+  beltGreen: phys("#3c7c40", { roughness: 0.72 }),
+  anodBlack: phys("#2a2c2f", { metalness: 0.85, roughness: 0.42 }),
+  zinc: phys("#d3d6d8", { metalness: 1, roughness: 0.42 }),
   tankDark: phys("#363c3f", { roughness: 0.55 }),
-  roofMetal: phys("#c3c6c6", { metalness: 1, roughness: 0.42, side: THREE.DoubleSide }),
-  clear: phys("#ffffff", { roughness: 0.04, transmission: 1, thickness: 0.03, ior: 1.49, transparent: false, attenuationColor: new THREE.Color("#e6f3ff"), attenuationDistance: 1.2 }),
-  lavender: phys("#ffffff", { roughness: 0.05, transmission: 0.92, thickness: 0.04, ior: 1.49, attenuationColor: new THREE.Color("#b9a6ff"), attenuationDistance: 0.35 }),
-  ledGreen: new THREE.MeshStandardMaterial({ color: "#38ff7a", emissive: new THREE.Color("#38ff7a"), emissiveIntensity: 2.2, toneMapped: false }),
-  ledRed: new THREE.MeshStandardMaterial({ color: "#ff4a3a", emissive: new THREE.Color("#ff4a3a"), emissiveIntensity: 2, toneMapped: false }),
-  screen: phys("#04140b", { emissive: new THREE.Color("#2dff86"), emissiveIntensity: 0.55, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.02 }),
-  debrisWhite: phys("#ecebe6", { roughness: 0.35 }),
-  debrisGreen: phys("#5d8f2a", { roughness: 0.9, bumpMap: grain, bumpScale: 1 }),
-  debrisBrown: phys("#7c5a35", { roughness: 0.9, bumpMap: grain, bumpScale: 1 }),
-  debrisBlue: phys("#3f79c9", { roughness: 0.32, clearcoat: 0.4 }),
 };
 
 /** Clear materials must not cast opaque shadows. */
-M.clear.userData.noShadow = true;
-M.lavender.userData.noShadow = true;
 M.binPlastic.userData.noShadow = true;
 
 /* ---------- photographic PBR textures, projected at true scale ----------
@@ -118,9 +96,6 @@ const SCAN: Record<string, { c: [number, number, number]; r: number }> = {
   plastic_gloss: { c: [0.169, 0.605, 0.883], r: 0.292 },
   metal_brushed: { c: [0.537, 0.541, 0.549], r: 0.43 },
   metal_grey: { c: [0.623, 0.63, 0.628], r: 0.536 },
-  galvanized: { c: [0.603, 0.61, 0.606], r: 0.406 },
-  concrete: { c: [0.723, 0.723, 0.723], r: 0.516 },
-  sand: { c: [0.725, 0.67, 0.596], r: 0.518 },
   rubber: { c: [0.167, 0.169, 0.194], r: 0.591 },
 };
 
@@ -279,83 +254,62 @@ const WATER_STAIN = "#9a8466"; // tea-brown lake residue
 const DUST = "#9c9b97";
 
 // PVC pipes: satin, lengthwise extrusion sheen, scuffs and brown water stains like the Madiwala hulls
-applyPBR(M.pvcPipeGrey, "plastic_white", { tile: 0.45, detail: 1, nScale: 0.5, rDetail: 3, grime: 0.8, dirt: WATER_STAIN, dirtAmt: 0.4 });
-applyPBR(M.pvcCap, "plastic_white", { tile: 0.3, detail: 1, nScale: 0.4, rDetail: 2, grime: 0.5, dirt: WATER_STAIN, dirtAmt: 0.3 });
-applyPBR(M.pvcCream, "plastic_white", { tile: 0.45, detail: 1, nScale: 0.5, rDetail: 3, grime: 0.6, dirt: WATER_STAIN, dirtAmt: 0.35 });
 applyPBR(M.pvcGrey, "plastic_white", { tile: 0.45, detail: 1, nScale: 0.5, rDetail: 3, grime: 0.7, dirt: WATER_STAIN, dirtAmt: 0.4 });
 
 // white sheet plastics and enclosures: clean-ish, light dust
 applyPBR(M.pvcWhite, "plastic_white", { tile: 0.35, detail: 1, nScale: 0.6, rDetail: 2, grime: 0.45, dirt: DUST, dirtAmt: 0.2 });
-applyPBR(M.boardWhite, "plastic_white", { tile: 0.5, detail: 1, nScale: 0.6, rDetail: 2, grime: 0.55, dirt: DUST, dirtAmt: 0.25 });
 applyPBR(M.deckWhite, "plastic_white", { tile: 0.5, detail: 1, nScale: 0.5, rDetail: 2, grime: 0.4, dirt: DUST, dirtAmt: 0.15 });
 applyPBR(M.plateWarm, "plastic_white", { tile: 0.5, detail: 1, nScale: 0.5, rDetail: 2, grime: 0.35, dirt: DUST, dirtAmt: 0.12 });
 
 // black ABS / nylon: fine grain and pale scuffs, not blotches
 applyPBR(M.black, "plastic_black", { tile: 0.3, detail: 0.3, nScale: 0.35, rDetail: 1.5, grime: 0.3, dirt: "#3a3a38", dirtAmt: 0.2 });
 applyPBR(M.blackGloss, "plastic_gloss", { tile: 0.25, detail: 0, nScale: 0.3, rDetail: 2, grime: 0.55 });
-applyPBR(M.rubber, "rubber", { tile: 0.25, detail: 0.5, nScale: 1.1, rDetail: 1, grime: 0.3 });
 applyPBR(M.tankDark, "plastic_dark", { tile: 0.5, detail: 0.5, nScale: 0.7, rDetail: 2, grime: 0.7, dirt: "#4a4438", dirtAmt: 0.3 });
 
 // metals: brushed stainless / aluminium frames, satin anodised pontoon tubes, galvanised posts and sheet
 applyPBR(M.stainless, "metal_brushed", { tile: 0.3, detail: 0.45, nScale: 0.6, rDetail: 3, grime: 0.4, dirt: DUST, dirtAmt: 0.15 });
-applyPBR(M.alu, "metal_brushed", { tile: 0.3, detail: 0.4, nScale: 0.6, rDetail: 3, grime: 0.4 });
-applyPBR(M.pontoon, "metal_brushed", { tile: 0.6, detail: 0.12, nScale: 0.3, rDetail: 1.5, grime: 0.18 }); // V4 is new: clean satin
 applyPBR(M.postGrey, "metal_brushed", { tile: 0.3, detail: 0.15, nScale: 0.4, rDetail: 2, grime: 0.18 });
 applyPBR(M.steelDark, "metal_grey", { tile: 0.35, detail: 0.4, nScale: 0.6, rDetail: 2, grime: 0.5, dirt: "#6e655a", dirtAmt: 0.25 });
-// the roof/wall sheets already have real corrugation in their geometry, so no normal map
-applyPBR(M.roofMetal, "galvanized", { tile: 0.6, detail: 0.8, normal: false, rDetail: 1, grime: 0.8, dirt: "#8c8270", dirtAmt: 0.3 });
 
-// V3 ground: smaller tile so the grains read as sand, not cork
-applyPBR(M.concrete, "concrete", { tile: 1, detail: 1, nScale: 1, rDetail: 1, grime: 0.9, dirt: "#9a9384", dirtAmt: 0.3 });
-M.concrete.color.set("#c4c2bc");
-M.concrete.map = null;
-applyPBR(M.sand, "sand", { tile: 0.45, detail: 1, nScale: 1.2, rDetail: 1, grime: 0.5 });
-M.sand.color.set("#bab09e");
-M.sand.map = null;
-M.sand.roughness = 0.95;
-M.concrete.roughness = 0.9;
+// CAD-model plastics and metals (V1, V2, V4): new and clean, so little colour variation and barely any grime, but
+// the scans' fine surface relief and roughness variation (orange-peel on moulded plastic, brushing on sheet metal)
+// are what make a render read as a real object instead of flat shading
+const CLEAN = { grime: 0.06, dirt: DUST, dirtAmt: 0 };
+for (const m of [M.cadBlue, M.cadBlueDeep, M.cadBlueFloor]) applyPBR(m, "plastic_gloss", { tile: 0.3, detail: 0, nScale: 0.22, rDetail: 1.4, ...CLEAN });
+applyPBR(M.hullTeal, "plastic_dark", { tile: 0.4, detail: 0, nScale: 0.18, rDetail: 0.8, ...CLEAN });
+applyPBR(M.bandDark, "plastic_black", { tile: 0.3, detail: 0.15, nScale: 0.3, rDetail: 1.4, ...CLEAN });
+applyPBR(M.tubLip, "plastic_black", { tile: 0.3, detail: 0.15, nScale: 0.3, rDetail: 1.4, ...CLEAN });
+applyPBR(M.tubLiner, "plastic_white", { tile: 0.4, detail: 0.5, nScale: 0.35, rDetail: 1.6, ...CLEAN });
+applyPBR(M.roofGrey, "plastic_white", { tile: 0.45, detail: 0.5, nScale: 0.3, rDetail: 1.6, ...CLEAN });
+applyPBR(M.beltGreen, "rubber", { tile: 0.2, detail: 0.35, nScale: 0.9, rDetail: 1, ...CLEAN });
+applyPBR(M.binGrey, "metal_grey", { tile: 0.3, detail: 0.08, nScale: 0.3, rDetail: 1.1, ...CLEAN });
+applyPBR(M.sheetSilver, "metal_brushed", { tile: 0.3, detail: 0.08, nScale: 0.3, rDetail: 1.4, ...CLEAN });
+applyPBR(M.zinc, "metal_brushed", { tile: 0.3, detail: 0.08, nScale: 0.3, rDetail: 1.4, ...CLEAN });
+applyPBR(M.anodBlack, "metal_brushed", { tile: 0.3, detail: 0.04, nScale: 0.45, rDetail: 2.2, ...CLEAN });
 
-// glossy coloured plastics keep their colour; they only take the scan's surface detail and a little wear
-for (const m of [M.yellow, M.yellowFace, M.orange, M.debrisBlue, M.debrisWhite]) {
-  applyPBR(m, "plastic_gloss", { tile: 0.3, detail: 0, nScale: 0.35, rDetail: 2, grime: 0.45, dirt: "#7d6f58", dirtAmt: 0.2 });
-}
 
-/** White plate with a black frame and bold text, like the "S.C.R.U.B." window on the control box. */
-export function labelTexture(text: string) {
+
+/** Black solar glass in a 4 x 2 grid of cells split by pale bus-bar lines (the V4 canopy panel). */
+export function solarTexture() {
   const c = document.createElement("canvas");
   c.width = 1024;
   c.height = 512;
   const g = c.getContext("2d")!;
-  g.fillStyle = "#f7f8f5";
+  g.fillStyle = "#04060a";
   g.fillRect(0, 0, 1024, 512);
-  g.strokeStyle = "#101214";
-  g.lineWidth = 44;
-  g.strokeRect(22, 22, 980, 468);
-  g.fillStyle = "#101214";
-  g.font = "600 170px 'Sora', Arial, sans-serif";
-  g.textAlign = "center";
-  g.textBaseline = "middle";
-  g.fillText(text, 512, 262);
+  // faint sky reflection across the cells
+  const sheen = g.createLinearGradient(0, 0, 1024, 512);
+  sheen.addColorStop(0, "rgba(40,52,76,0.0)");
+  sheen.addColorStop(0.5, "rgba(46,58,84,0.55)");
+  sheen.addColorStop(1, "rgba(20,26,40,0.0)");
+  g.fillStyle = sheen;
+  g.fillRect(0, 0, 1024, 512);
+  g.fillStyle = "#b7bcc2";
+  for (const x of [0, 256, 512, 768, 1018]) g.fillRect(x - 5, 0, 10, 512);
+  for (const y of [0, 256, 506]) g.fillRect(0, y - 5, 1024, 10);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
   return t;
 }
 
-/** Matte matt grey-black with printed text, for small decals. */
-export function decalMaterial(text: string, fg = "#101214", bg = "rgba(0,0,0,0)") {
-  const c = document.createElement("canvas");
-  c.width = 512;
-  c.height = 128;
-  const g = c.getContext("2d")!;
-  g.fillStyle = bg;
-  g.fillRect(0, 0, 512, 128);
-  g.fillStyle = fg;
-  g.font = "700 74px 'Sora', Arial, sans-serif";
-  g.textAlign = "center";
-  g.textBaseline = "middle";
-  g.fillText(text, 256, 66);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: 0.6 });
-}

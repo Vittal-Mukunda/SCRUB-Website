@@ -6,8 +6,11 @@ import { bots } from "../data/content";
 import { loadedScans } from "./mat";
 import { blobTexture, Lights, Stand } from "./shared";
 import { AdaptiveResolution } from "./adaptive";
+import { compileAsyncAO, renderWithAO } from "./ao";
 import { topDpr } from "./dpr";
-import { hideLeaves, layoutLeaves, leafGeometry, leafTexture, makeSpecs, sweepEndFor, sweepX, updateLeaves } from "./leaves";
+import { hideLeaves, layoutLeaves, leafGeometry, leafTexture, makeSpecs, SWEEP_YAW, sweepEndFor, sweepX, sweepYaw, updateLeaves } from "./leaves";
+import { REL_SIZE } from "./sizes";
+import { BELT_LOW, BELT_TOP } from "./v1Belt";
 import { Ripples } from "./ripples";
 import type { LeafField, LeafLayout } from "./leaves";
 import type { LeafSources } from "./timeline";
@@ -33,7 +36,8 @@ export interface RoadmapSceneProps {
 }
 
 /** Yaw (radians) each robot holds while it is on stage, picked so its features face the camera. */
-const SHOW_YAW: Record<string, number> = { v1: 0.5, v2: 0.55, v3: 0.35, v4: 0.55 };
+// every robot travels left on this page, so each rests with its bow to the left, turned a little towards the viewer
+const SHOW_YAW: Record<string, number> = { v1: Math.PI + 0.75, v2: Math.PI + 0.55, v4: Math.PI + 0.55 };
 const TILT = 0.4;
 /** seconds a robot takes to swim to a new spot: eases out of rest and into it, like a boat */
 const SWIM_TIME = 0.6;
@@ -106,6 +110,32 @@ function Stage({ activeRef, uRef, sourcesRef, reserveRef, onReady, onLeavesReady
     return () => clearTimeout(t);
   }, [loaded, mounted]);
 
+  const vw = viewport.width;
+  const px = vw / size.width; // world units per pixel at the display plane
+
+  /** Where, and how large, the on-stage robot sits. Wide screens: right half. Phones: upper half. */
+  const rest = (f: Fit, i: number) => {
+    const availW = narrow ? size.width * 0.9 : size.width * 0.5;
+    const top = 76; // the nav bar
+    const availH = narrow ? Math.min(size.height * 0.4, Math.max(size.height * 0.22, size.height - top - reserveRef.current - 16)) : size.height * 0.58;
+    const fits = (g: Fit) => Math.min((availW * px) / g.d, (availH * px) / (g.sy + g.d * 0.2));
+    // one footprint for the lot: the robot that needs the most room just fits, and the others keep their size next to it
+    // one robot fills this stage at a time, so the size difference is softened (square root of the real ratio)
+    // or the compact V4 would look lost next to the big V1; the products grid shows the true ratios
+    const rel = (id: string) => Math.sqrt(REL_SIZE[id] ?? 1);
+    let foot = (fits(f) * f.d) / rel(bots[i].id);
+    slots.current.forEach((sl, j) => {
+      if (sl.fit) foot = Math.min(foot, (fits(sl.fit) * sl.fit.d) / rel(bots[j].id));
+    });
+    const scale = (foot * rel(bots[i].id)) / f.d;
+    const e = { w: f.d, h: f.sy + f.d * 0.2 };
+    const hPx = (e.h * scale) / px;
+    const cx = narrow ? size.width / 2 : size.width * 0.7;
+    const cy = narrow ? top + availH / 2 : size.height * 0.5;
+    const groundPy = cy + hPx * 0.28;
+    return { x: (cx - size.width / 2) * px, y: -(groundPy - size.height / 2) * px, scale };
+  };
+
   // build every shader and upload the scans while the robots are still hidden, so the first swim-in is smooth
   useEffect(() => {
     if (compiled || loaded < bots.length) return;
@@ -116,7 +146,7 @@ function Stage({ activeRef, uRef, sourcesRef, reserveRef, onReady, onLeavesReady
       return () => hidden.forEach((a) => (a.visible = false));
     };
     const restore = showAll();
-    const done = gl.compileAsync(scene, camera);
+    const done = compileAsyncAO(gl, scene, camera);
     restore();
     const upload = async () => {
       for (const t of loadedScans) {
@@ -135,10 +165,10 @@ function Stage({ activeRef, uRef, sourcesRef, reserveRef, onReady, onLeavesReady
         if (!sl.anchor || !spin || !sl.fit) return null;
         const prev = { pos: sl.anchor.position.clone(), scale: spin.scale.x };
         sl.anchor.position.set(0, 0, 0);
-        spin.scale.setScalar(rest(sl.fit).scale);
+        spin.scale.setScalar(rest(sl.fit, i).scale);
         return prev;
       });
-      gl.render(scene, camera);
+      renderWithAO(gl, scene, camera);
       saved.forEach((p, i) => {
         const sl = slots.current[i];
         if (!p || !sl.anchor) return;
@@ -159,34 +189,32 @@ function Stage({ activeRef, uRef, sourcesRef, reserveRef, onReady, onLeavesReady
     return () => {
       alive = false;
     };
+    // `rest` only sizes the robots for the hidden warm-up frame, so a stale copy is fine and must not re-run it
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [compiled, loaded, gl, scene, camera, onReady]);
 
   useEffect(() => {
     if (loaded >= 1) onLeavesReady();
   }, [loaded, onLeavesReady]);
 
-  const vw = viewport.width;
-  const px = vw / size.width; // world units per pixel at the display plane
-
-  /** Where, and how large, the on-stage robot sits. Wide screens: right half. Phones: upper half. */
-  const rest = (f: Fit) => {
-    const e = { w: f.d, h: f.sy + f.d * 0.2 };
-    const availW = narrow ? size.width * 0.9 : size.width * 0.5;
-    const top = 76; // the nav bar
-    const availH = narrow ? Math.min(size.height * 0.4, Math.max(size.height * 0.22, size.height - top - reserveRef.current - 16)) : size.height * 0.58;
-    const scale = Math.min((availW * px) / e.w, (availH * px) / e.h);
-    const hPx = (e.h * scale) / px;
-    const cx = narrow ? size.width / 2 : size.width * 0.7;
-    const cy = narrow ? top + availH / 2 : size.height * 0.5;
-    const groundPy = cy + hPx * 0.28;
-    return { x: (cx - size.width / 2) * px, y: -(groundPy - size.height / 2) * px, scale };
-  };
-
   /** The lake, the leaves and V1's pass, derived from where V1 sits on this screen. */
   const field = (f: Fit): LeafField => {
-    const r = rest(f);
+    const r = rest(f, 0);
     const unit = f.d * r.scale;
     const toWorld = (p: number) => (p - size.width / 2) * px;
+    // V1's belt as it sits in the scene while it sweeps: model points turned to the sweep heading and scaled,
+    // relative to V1's centre (x along the lake, height above the water, z across), a leaf's thickness above the surface
+    const cy = Math.cos(SWEEP_YAW);
+    const sy = Math.sin(SWEEP_YAW);
+    const onBelt = (m: [number, number]): [number, number, number] => {
+      const rx = m[0] - f.cx;
+      const rz = -f.cz;
+      return [r.scale * (rx * cy + rz * sy), r.scale * (m[1] - f.minY) + 0.012 * unit, r.scale * (-rx * sy + rz * cy)];
+    };
+    const beltLow = onBelt(BELT_LOW);
+    const beltTop = onBelt(BELT_TOP);
+    const front = -beltLow[0];
+    const ramp = beltTop[0] - beltLow[0];
     // on wide screens the leaves settle to the right of the text, so V1 never has to cross it
     const leftW = toWorld(size.width * (narrow ? 0.1 : 0.56));
     return {
@@ -195,12 +223,16 @@ function Stage({ activeRef, uRef, sourcesRef, reserveRef, onReady, onLeavesReady
       groundY: r.y,
       unit,
       leafLen: unit * 0.085,
-      bandZ: 0.16 * unit,
+      bandZ: 0.11 * unit, // narrower than the belt, so every kept leaf is on its path
       // just past the right edge, so it is in view for the whole of its cleaning motion
       startX: toWorld(size.width) + 0.55 * unit,
-      endX: sweepEndFor(leftW, unit),
+      endX: sweepEndFor(leftW, front, ramp, unit),
       restX: r.x,
-      binH: f.sy * r.scale * 0.42,
+      front,
+      ramp,
+      beltLow,
+      beltTop,
+      rampPitch: Math.atan2(beltTop[1] - beltLow[1], ramp),
       tilt: TILT,
     };
   };
@@ -218,7 +250,7 @@ function Stage({ activeRef, uRef, sourcesRef, reserveRef, onReady, onLeavesReady
     slots.current.forEach((s, i) => {
       const spin = spins.current[i];
       if (!s.anchor || !spin || !s.fit) return;
-      const r = rest(s.fit);
+      const r = rest(s.fit, i);
       const ub = s.fit.d * r.scale;
       const away = size.width * 1.15 * px;
       // V1 on the journey slide follows the scroll-driven sweep exactly; otherwise earlier robots have
@@ -248,7 +280,11 @@ function Stage({ activeRef, uRef, sourcesRef, reserveRef, onReady, onLeavesReady
       s.anchor.visible = Math.abs(dx) < away * 0.96;
       // nose turns along the way it is travelling while it swims, then settles to its show angle
       const lean = THREE.MathUtils.clamp(dx / away, -1, 1);
-      spin.rotation.y = (SHOW_YAW[bots[i].id] ?? 0.5) + (reduced ? 0 : Math.sin(t * 0.5 + i) * 0.06) - lean * 0.7;
+      const showYaw = SHOW_YAW[bots[i].id] ?? Math.PI + 0.5;
+      const wobble = reduced ? 0 : Math.sin(t * 0.5 + i) * 0.06;
+      // V1 sweeping the leaves keeps its heading (so the belt line the leaves ride stays put); the others
+      // turn along the way they are travelling
+      spin.rotation.y = sweeping ? sweepYaw(u, showYaw) : showYaw + wobble - lean * 0.7;
       spin.scale.setScalar(s.scale);
       s.run.current = s.anchor.visible;
 

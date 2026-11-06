@@ -38,3 +38,26 @@ and their sizes in `src/data/images.gen.ts`, which `<img>` uses for `srcset` so 
 - The 3D showroom stops drawing when scrolled out of view, lowers its resolution (and then its frame rate) on
   slow devices, falls back to photo cards on devices without a real GPU, builds the robots one at a time and
   compiles shaders and uploads textures behind the loading screen.
+
+## The 3D robots
+
+The three robots (V1, V2, V4) are built in code from the team's Fusion CAD views, one file each in
+`src/three/models/`, from small shared parts (`parts.tsx`) and a PBR material palette (`mat.ts`) that uses CC0
+photo-scanned textures from `public/textures`. There is no model file to download.
+
+- **Proportions:** `src/three/sizes.ts` holds each robot's size relative to V1. The products grid uses the real
+  ratios; the home journey softens them (it shows one robot at a time). Replace them with measured dimensions
+  when they are known.
+- **Home page leaf sweep:** V1's conveyor geometry lives in `src/three/v1Belt.ts`, shared by the model and by the
+  leaf animation, so the leaves ride the real belt into the basket.
+- **Ambient occlusion:** `src/three/ao.ts` adds a half-resolution screen-space AO pass (about 2 ms a frame on a
+  discrete GPU). It switches itself off when the frame rate drops, and falls back to plain rendering on GPUs
+  without float render targets. Add `?ao=0` to the first URL to disable it, or `?ao=debug` to see the AO term.
+- **Text and specs:** hotspot labels are in `src/three/hotspots.ts`; everything else is in `src/data/content.ts`.
+  Items marked `draft` there are placeholders for the team to confirm.
+
+## Lint
+
+`npm run lint` (oxlint) is clean. The React-compiler rules about mutation and refs are switched off for
+`src/three/` only (see `.oxlintrc.json`): a three.js scene mutates three.js objects and reads refs inside the
+frame loop by design.
